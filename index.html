@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chord Trainer">
+<meta name="theme-color" content="#0c0e14">
+<title>Chord Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="Chord%20Trainer_files/css2_H6By.css" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { 
+  min-height: 100vh; 
+  background: linear-gradient(170deg, #0c0e14 0%, #12151f 40%, #0f1219 100%);
+  color: #e8e6e3; font-family: 'Nunito', sans-serif; 
+  -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+}
+#app { max-width: 720px; margin: 0 auto; padding: 20px 12px; }
+h1 {
+  font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(135deg, #f6c755 0%, #e8a020 50%, #d4881a 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-align: center; margin-bottom: 10px;
+}
+.badges { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.06); color: #9ca3af; font-weight: 600; }
+.badge.streak { background: rgba(232,168,56,0.2); color: #f6c755; }
+.badge.due { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 4px; }
+.tab { flex: 1; padding: 10px 4px; border: none; border-radius: 10px; background: transparent; color: #6b7280; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.tab.active { background: rgba(232,168,56,0.12); color: #f6c755; }
+.quiz-card { background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); padding: 20px; margin-bottom: 20px; }
+.question-area { text-align: center; margin-bottom: 20px; }
+.prompt { font-size: 16px; color: #9ca3af; margin-bottom: 16px; font-weight: 600; }
+.piano-wrap { overflow-x: auto; padding: 8px 0; display: flex; justify-content: center; }
+.piano { position: relative; margin: 0 auto; user-select: none; }
+.wk { position: absolute; top: 0; background: linear-gradient(180deg, #faf8f5 0%, #e8e4de 100%); border-radius: 0 0 4px 4px; border: 1px solid #b8b4ae; box-shadow: inset 0 -4px 8px rgba(0,0,0,0.05); display: flex; align-items: flex-end; justify-content: center; transition: all 0.2s; }
+.wk.lit { background: linear-gradient(180deg, #f6c755 0%, #e8a020 100%); box-shadow: 0 0 16px 2px rgba(232,160,32,0.5), inset 0 -4px 8px rgba(0,0,0,0.1); }
+.wk .lbl { font-size: 10px; color: #999; font-weight: 400; font-family: 'Space Mono', monospace; padding-bottom: 6px; }
+.wk.lit .lbl { color: #5a3800; font-weight: 700; }
+.bk { position: absolute; top: 0; background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%); border-radius: 0 0 3px 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; align-items: flex-end; justify-content: center; transition: all 0.2s; z-index: 2; }
+.bk.lit { background: linear-gradient(180deg, #f6c755 0%, #c98a10 100%); box-shadow: 0 0 14px 2px rgba(232,160,32,0.6); }
+.bk .lbl { font-size: 8px; color: transparent; font-weight: 700; font-family: 'Space Mono', monospace; padding-bottom: 4px; }
+.bk.lit .lbl { color: #5a3800; }
+.note-display { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.note-bubble { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; padding: 12px 20px; border-radius: 12px; background: linear-gradient(135deg, rgba(232,168,56,0.15), rgba(232,168,56,0.08)); border: 1px solid rgba(232,168,56,0.3); color: #f6c755; }
+.chord-name { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 700; color: #f6c755; margin-top: 8px; }
+.feedback { padding: 10px 16px; border-radius: 10px; border: 1px solid; margin-bottom: 16px; text-align: center; font-weight: 700; font-size: 15px; }
+.feedback.correct { background: rgba(74,222,128,0.12); border-color: #4ade80; color: #4ade80; }
+.feedback.wrong { background: rgba(248,113,113,0.12); border-color: #f87171; color: #f87171; }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt { padding: 14px 12px; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 600; color: #e8e6e3; text-align: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.2s; -webkit-appearance: none; }
+.opt:active { transform: scale(0.97); }
+.opt.correct-pick { background: rgba(74,222,128,0.15); border-color: #4ade80; }
+.opt.wrong-pick { background: rgba(248,113,113,0.15); border-color: #f87171; }
+.opt.correct-reveal { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.4); }
+.opt.dimmed { opacity: 0.4; }
+.opt:disabled { cursor: default; }
+.reveal-btn { width: 100%; padding: 16px; border-radius: 12px; border: 1px dashed rgba(232,168,56,0.3); background: rgba(232,168,56,0.06); color: #f6c755; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.reveal-btn:active { transform: scale(0.98); background: rgba(232,168,56,0.12); }
+.audio-controls { display: flex; justify-content: center; gap: 10px; margin: 12px 0; }
+.audio-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #9ca3af; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.audio-btn:active { transform: scale(0.95); }
+.progress-section { margin-bottom: 16px; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 4px; }
+.progress-label { font-size: 12px; color: #6b7280; font-weight: 600; }
+.progress-bar-bg { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 10px; }
+.progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #e8a838, #f6c755); transition: width 0.5s; }
+.dot-row { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; transition: all 0.3s; }
+.dot.empty { background: rgba(255,255,255,0.08); }
+.dot.right { background: #4ade80; }
+.dot.wrong { background: #f87171; }
+.stats-toggle { width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; color: #6b7280; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+.stats-panel { background: rgba(255,255,255,0.03); border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); padding: 20px; margin-bottom: 16px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+.stat-value { font-size: 24px; font-weight: 700; color: #f6c755; font-family: 'Space Mono', monospace; text-align: center; }
+.stat-label { font-size: 11px; color: #6b7280; margin-top: 4px; text-align: center; }
+.chord-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.chord-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #9ca3af; font-family: 'Space Mono', monospace; }
+.reset-btn { margin-top: 16px; padding: 10px 20px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); border-radius: 8px; color: #f87171; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+.key-unlock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.key-btn { padding: 8px 4px; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: #6b7280; }
+.key-btn.unlocked { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ade80; cursor: default; }
+.key-btn:not(.unlocked):active { transform: scale(0.95); }
+.ext-toggles { display: flex; gap: 10px; margin-top: 8px; }
+.ext-toggle { flex: 1; padding: 12px 8px; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: #6b7280; }
+.ext-toggle.on { background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.3); color: #60a5fa; }
+.ext-toggle:active { transform: scale(0.97); }
+</style>
+</head>
+<body>
+<div id="app"><h1>Chord Trainer</h1><div class="badges"><span class="badge">6 / 252 chords</span><span class="badge">Triads</span><span class="badge due">6 due</span></div><div class="tabs"><button class="tab" onclick="setMode(0)">Piano View</button><button class="tab" onclick="setMode(1)">Note List</button><button class="tab" onclick="setMode(2)">Name the Notes</button><button class="tab active" onclick="setMode(3)">Mixed</button></div><div class="quiz-card"><div class="question-area"><p class="prompt">What notes make up this chord?</p><div class="chord-name">Cm (Root)</div></div><div class="audio-controls"><button class="audio-btn" onclick="replayAudio()">🔊 Replay</button></div><button class="reveal-btn" onclick="revealOptions()">Think first… then tap to show options</button></div><div class="progress-section"><div class="progress-header"><span class="progress-label">Progress to next unlock</span><span class="progress-label">0/20 · 0% (need 90%)</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%"></div></div><div class="dot-row"><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div></div><button class="stats-toggle" onclick="showStats=!showStats;render();">Show Stats &amp; Settings</button></div>
+<script>
+// ===== MUSIC THEORY ENGINE =====
+const NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const NAME_TO_CHROMA = {"C":0,"C#":1,"Db":1,"D":2,"D#":3,"Eb":3,"E":4,"Fb":4,"E#":5,"F":5,"F#":6,"Gb":6,"G":7,"G#":8,"Ab":8,"A":9,"A#":10,"Bb":10,"B":11,"Cb":11,"B#":0};
+const LETTERS = ["C","D","E","F","G","A","B"];
+function letterIndex(n) { return LETTERS.indexOf(n[0]); }
+function spellNote(rootName, degreeUp, chromaInterval) {
+  const targetChroma = (NAME_TO_CHROMA[rootName] + chromaInterval) % 12;
+  const targetLetter = LETTERS[(letterIndex(rootName) + degreeUp) % 7];
+  const diff = ((targetChroma - NAME_TO_CHROMA[targetLetter]) + 12) % 12;
+  if (diff === 0) return targetLetter;
+  if (diff === 1) return targetLetter + "#";
+  if (diff === 11) return targetLetter + "b";
+  if (diff === 2) return targetLetter + "##";
+  if (diff === 10) return targetLetter + "bb";
+  return targetLetter;
+}
+const INTERVAL_DEFS = { P1:[0,0], m3:[2,3], M3:[2,4], P5:[4,7], d5:[4,6], m7:[6,10], M7:[6,11], M9:[1,14] };
+const CHORD_FORMULAS = {
+  major:{ intervals:["P1","M3","P5"], sym:"" },
+  minor:{ intervals:["P1","m3","P5"], sym:"m" },
+  dom7:{ intervals:["P1","M3","P5","m7"], sym:"7" },
+  maj7:{ intervals:["P1","M3","P5","M7"], sym:"maj7" },
+  min7:{ intervals:["P1","m3","P5","m7"], sym:"m7" },
+  dom9:{ intervals:["P1","M3","P5","m7","M9"], sym:"9" },
+  maj9:{ intervals:["P1","M3","P5","M7","M9"], sym:"maj9" },
+  min9:{ intervals:["P1","m3","P5","m7","M9"], sym:"m9" },
+};
+const ROOT_DISPLAY = {"C":"C","C#":"C#","D":"D","D#":"Eb","E":"E","F":"F","F#":"F#","G":"G","G#":"Ab","A":"A","A#":"Bb","B":"B"};
+const ROOT_ORDER = ["C","G","D","A","E","B","F","A#","D#","G#","C#","F#"];
+const INV_LABELS = ["Root","1st Inv","2nd Inv","3rd Inv","4th Inv"];
+const TRIAD_TYPES = new Set(["major","minor"]);
+const SEVENTH_TYPES = new Set(["dom7","maj7","min7"]);
+function chordCategory(c) { return TRIAD_TYPES.has(c.type)?"triad":SEVENTH_TYPES.has(c.type)?"seventh":"ninth"; }
+function getChordNoteNames(root, type, inv) {
+  const dr = ROOT_DISPLAY[root]||root;
+  let names = CHORD_FORMULAS[type].intervals.map(i => { const [d,s]=INTERVAL_DEFS[i]; return spellNote(dr,d,s); });
+  for (let i=0;i<inv;i++) names.push(names.shift());
+  return names;
+}
+function getChordMidi(root, type, inv) {
+  const ri = NOTES.indexOf(root), base = 60+ri;
+  let midis = CHORD_FORMULAS[type].intervals.map(i => base + INTERVAL_DEFS[i][1]);
+  for (let i=0;i<inv;i++) midis[i]+=12;
+  midis.sort((a,b)=>a-b);
+  while(midis[midis.length-1]>84) midis=midis.map(m=>m-12);
+  while(midis[0]<48) midis=midis.map(m=>m+12);
+  return midis;
+}
+function chordDisplayName(c) {
+  const dr = ROOT_DISPLAY[c.root]||c.root;
+  return dr + CHORD_FORMULAS[c.type].sym + (c.inv>0 ? ` (${INV_LABELS[c.inv]})` : "");
+}
+function chordId(c) { return c.root+"_"+c.type+"_"+c.inv; }
+function shuffle(a) { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// ===== CHORD POOL =====
+function buildChordPool() {
+  const pool = [];
+  for (const r of ROOT_ORDER) { for (let inv=0;inv<=2;inv++) { pool.push({root:r,type:"major",inv}); pool.push({root:r,type:"minor",inv}); } }
+  for (const r of ROOT_ORDER) pool.push({root:r,type:"dom7",inv:0});
+  for (const r of ROOT_ORDER) pool.push({root:r,type:"maj7",inv:0});
+  for (const r of ROOT_ORDER) pool.push({root:r,type:"min7",inv:0});
+  for (const t of ["dom7","maj7","min7"]) for (let inv=1;inv<=3;inv++) for (const r of ROOT_ORDER) pool.push({root:r,type:t,inv});
+  for (const t of ["dom9","maj9","min9"]) for (const r of ROOT_ORDER) pool.push({root:r,type:t,inv:0});
+  return pool;
+}
+const CHORD_POOL = buildChordPool();
+
+// ===== PIANO =====
+const PIANO_START=48, PIANO_END=84;
+const isBlack = m => [1,3,6,8,10].includes(m%12);
+const WHITE_KEYS=[], ALL_KEYS=[];
+for(let m=PIANO_START;m<=PIANO_END;m++){ALL_KEYS.push(m);if(!isBlack(m))WHITE_KEYS.push(m);}
+const WK_W=32,WK_H=140,BK_W=20,BK_H=88;
+
+// ===== AUDIO ENGINE =====
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+function playPianoNote(ctx, freq, startTime) {
+  const harmonics = [1, 2, 3, 4, 5, 6];
+  const amps = [1, 0.45, 0.2, 0.1, 0.05, 0.02];
+  const master = ctx.createGain();
+  master.connect(ctx.destination);
+  const now = startTime;
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(0.13, now + 0.008);
+  master.gain.exponentialRampToValueAtTime(0.06, now + 0.2);
+  master.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+  harmonics.forEach((h, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq * h;
+    const g = ctx.createGain();
+    g.gain.value = amps[i];
+    osc.connect(g); g.connect(master);
+    osc.start(now); osc.stop(now + 2.5);
+  });
+}
+function playChordAudio(midis) {
+  try {
+    ensureAudio();
+    const now = audioCtx.currentTime;
+    midis.forEach((m, i) => playPianoNote(audioCtx, midiToFreq(m), now + i * 0.03));
+  } catch(e) { console.warn('Audio not available:', e); }
+}
+let currentChordMidis = [];
+
+// ===== FSRS SCHEDULER =====
+const FSRS_W = [0.4,0.6,2.4,5.8,4.93,0.94,0.86,0.01,1.49,0.14,0.94,2.18,0.05,0.34,1.26,0.29,2.61];
+const TARGET_RETENTION = 0.9;
+const DAYS_MS = 86400000;
+
+function fsrsInitStability(grade) { return Math.max(FSRS_W[grade-1], 0.1); }
+function fsrsInitDifficulty(grade) {
+  return Math.min(Math.max(FSRS_W[4] - Math.exp(FSRS_W[5] * (grade-1)) + 1, 1), 10);
+}
+function fsrsRetrievability(elapsedDays, stability) {
+  return Math.pow(1 + elapsedDays / (9 * stability), -1);
+}
+function fsrsNextInterval(stability) {
+  return Math.max(0.5, stability * 9 * (1/TARGET_RETENTION - 1));
+}
+function fsrsNextDifficulty(d, grade) {
+  const d0 = fsrsInitDifficulty(3);
+  const newD = d - FSRS_W[6] * (grade - 3);
+  return Math.min(Math.max(FSRS_W[7] * d0 + (1 - FSRS_W[7]) * newD, 1), 10);
+}
+function fsrsNextRecallStability(d, s, r) {
+  return s * (1 + Math.exp(FSRS_W[8]) * (11-d) * Math.pow(s, -FSRS_W[9]) * (Math.exp(FSRS_W[10]*(1-r)) - 1));
+}
+function fsrsNextForgetStability(d, s, r) {
+  return Math.max(0.1, FSRS_W[11] * Math.pow(d, -FSRS_W[12]) * (Math.pow(s+1, FSRS_W[13]) - 1) * Math.exp(FSRS_W[14]*(1-r)));
+}
+
+function fsrsNewCard() { return { s:0, d:0, lr:0, sd:0, reps:0, lapses:0, st:0 }; }
+
+function fsrsUpdate(card, grade) {
+  const now = Date.now();
+  if (card.st === 0 || card.lr === 0) {
+    // New card — first review
+    const s = fsrsInitStability(grade);
+    const d = fsrsInitDifficulty(grade);
+    return { s, d, lr:now, sd:fsrsNextInterval(s), reps:grade>=3?1:0, lapses:grade<3?1:0, st:grade>=3?2:1 };
+  }
+  // Existing card
+  const elapsed = Math.max((now - card.lr) / DAYS_MS, 0.003); // min ~4 minutes
+  const r = fsrsRetrievability(elapsed, card.s);
+  const newD = fsrsNextDifficulty(card.d, grade);
+  let newS, newSt, reps=card.reps, lapses=card.lapses;
+  if (grade >= 3) {
+    newS = fsrsNextRecallStability(card.d, card.s, r);
+    newSt = 2; reps++;
+  } else {
+    newS = fsrsNextForgetStability(card.d, card.s, r);
+    newSt = 3; lapses++;
+  }
+  return { s:newS, d:newD, lr:now, sd:fsrsNextInterval(newS), reps, lapses, st:newSt };
+}
+
+function fsrsUrgency(card) {
+  if (!card || card.st === 0 || card.lr === 0) return 2.0; // new cards are high priority
+  const elapsed = (Date.now() - card.lr) / DAYS_MS;
+  return elapsed / Math.max(card.sd, 0.01);
+}
+
+// ===== PERSISTENCE =====
+const STORAGE_KEY = "chord-trainer-progress";
+const DEFAULT_PROGRESS = { unlockedCount:6, recent:[], totalCorrect:0, totalAttempts:0, manualUnlocks:[], fsrs:{}, seventhsEnabled:false, ninthsEnabled:false };
+
+function loadProgress() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    if (!d) return {...DEFAULT_PROGRESS, fsrs:{}, manualUnlocks:[]};
+    const p = JSON.parse(d);
+    // Migrate from old weight-based system
+    if (p.weights && !p.fsrs) { p.fsrs = {}; delete p.weights; }
+    if (!p.fsrs) p.fsrs = {};
+    if (!p.manualUnlocks) p.manualUnlocks = [];
+    return p;
+  } catch(e) { return {...DEFAULT_PROGRESS, fsrs:{}, manualUnlocks:[]}; }
+}
+function saveProgress(p) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch(e) { console.error(e); }
+}
+
+function chordGroup(c) { return (ROOT_DISPLAY[c.root]||c.root) + "_" + c.type; }
+
+function getUnlockedRoots(prog) {
+  const manual = new Set(prog.manualUnlocks || []);
+  const roots = new Set();
+  CHORD_POOL.forEach((c, i) => {
+    if (!TRIAD_TYPES.has(c.type)) return;
+    if (i < prog.unlockedCount || manual.has(chordGroup(c))) roots.add(c.root);
+  });
+  return roots;
+}
+
+function getAvailableChords(prog) {
+  const manual = new Set(prog.manualUnlocks || []);
+  const unlockedRoots = getUnlockedRoots(prog);
+  return CHORD_POOL.filter((c, i) => {
+    if (TRIAD_TYPES.has(c.type)) {
+      return i < prog.unlockedCount || manual.has(chordGroup(c));
+    }
+    if (SEVENTH_TYPES.has(c.type)) {
+      return prog.seventhsEnabled && unlockedRoots.has(c.root);
+    }
+    return prog.ninthsEnabled && unlockedRoots.has(c.root);
+  });
+}
+
+// ===== APP STATE =====
+let progress = loadProgress();
+let mode = 3;
+let question = null;
+let feedback = null;
+let selectedIdx = null;
+let streak = 0;
+let showStats = false;
+let recentChords = [];
+let optionsRevealed = false;
+
+const MODE_NAMES = ["Piano View","Note List","Name the Notes","Mixed"];
+
+function generateOptions(correct, mode) {
+  const correctName = chordDisplayName(correct);
+  const correctNotes = getChordNoteNames(correct.root,correct.type,correct.inv);
+  const correctCat = chordCategory(correct);
+  const sameCatPool = CHORD_POOL.filter(c => chordCategory(c)===correctCat && chordId(c)!==chordId(correct));
+  if (mode===2) {
+    const options = [{notes:correctNotes,correct:true,label:correctNotes.join(" – ")}];
+    for (const c of shuffle(sameCatPool)) {
+      if (options.length>=4) break;
+      const n=getChordNoteNames(c.root,c.type,c.inv), label=n.join(" – ");
+      if (!options.find(o=>o.label===label)) options.push({notes:n,correct:false,label});
+    }
+    return shuffle(options);
+  } else {
+    const options = [{name:correctName,correct:true,chord:correct}];
+    for (const c of shuffle(sameCatPool)) {
+      if (options.length>=4) break;
+      const n=chordDisplayName(c);
+      if (!options.find(o=>o.name===n)) options.push({name:n,correct:false,chord:c});
+    }
+    return shuffle(options);
+  }
+}
+
+function getDueCount() {
+  const available = getAvailableChords(progress);
+  const fsrs = progress.fsrs || {};
+  return available.filter(c => fsrsUrgency(fsrs[chordId(c)]) >= 1.0).length;
+}
+
+function nextQuestion() {
+  const available = getAvailableChords(progress);
+  const fsrs = progress.fsrs || {};
+
+  // Score each chord by FSRS urgency
+  let entries = available.map(c => ({chord:c, urgency:fsrsUrgency(fsrs[chordId(c)])}));
+
+  // Block triple consecutive
+  const blocked = (recentChords.length>=2 && recentChords[recentChords.length-1]===recentChords[recentChords.length-2]) ? recentChords[recentChords.length-1] : null;
+  if (blocked && entries.length>1) entries = entries.filter(e => chordId(e.chord)!==blocked);
+
+  // Sort by urgency descending, pick from top candidates with some randomness
+  entries.sort((a,b) => b.urgency - a.urgency);
+  // Pick from top 3-5 to add variety among equally-due cards
+  const topN = Math.min(entries.length, Math.max(3, Math.ceil(entries.length * 0.15)));
+  const pick = entries[Math.floor(Math.random() * topN)];
+  const chord = pick.chord;
+
+  recentChords = [...recentChords, chordId(chord)].slice(-2);
+  const effectiveMode = mode===3 ? Math.floor(Math.random()*3) : mode;
+  const options = generateOptions(chord, effectiveMode);
+  question = {chord, options, qMode:effectiveMode};
+  feedback = null; selectedIdx = null; optionsRevealed = false;
+
+  // Set up audio
+  currentChordMidis = getChordMidi(chord.root, chord.type, chord.inv);
+
+  render();
+
+  // Auto-play chord audio
+  setTimeout(() => playChordAudio(currentChordMidis), 200);
+}
+
+function revealOptions() {
+  optionsRevealed = true;
+  render();
+}
+
+function replayAudio() {
+  playChordAudio(currentChordMidis);
+}
+
+function handleAnswer(idx) {
+  if (feedback) return;
+  selectedIdx = idx;
+  const isCorrect = question.options[idx].correct;
+  feedback = isCorrect ? "correct" : "wrong";
+  if (isCorrect) streak++; else streak=0;
+
+  // Update FSRS card
+  const cId = chordId(question.chord);
+  const fsrs = progress.fsrs || {};
+  const card = fsrs[cId] || fsrsNewCard();
+  const grade = isCorrect ? 3 : 1; // Good or Again
+  fsrs[cId] = fsrsUpdate(card, grade);
+
+  progress = {...progress, fsrs:{...fsrs}};
+  progress.totalAttempts++;
+  if (isCorrect) progress.totalCorrect++;
+  progress.recent = [...progress.recent, isCorrect].slice(-20);
+
+  // Check for auto-unlock
+  if (progress.recent.length >= 20) {
+    const cc = progress.recent.filter(Boolean).length;
+    if (cc >= 18 && progress.unlockedCount < CHORD_POOL.length) {
+      const inc = progress.unlockedCount < 72 ? 6 : 2;
+      progress.unlockedCount = Math.min(progress.unlockedCount + inc, CHORD_POOL.length);
+      progress.recent = [];
+    }
+  }
+  saveProgress(progress);
+  render();
+  setTimeout(() => nextQuestion(), isCorrect ? 1000 : 2200);
+}
+
+function unlockGroup(root, type) {
+  const dr = ROOT_DISPLAY[root]||root;
+  const groupKey = dr + "_" + type;
+  const manual = progress.manualUnlocks || [];
+  if (manual.includes(groupKey)) return;
+  progress.manualUnlocks = [...manual, groupKey];
+  progress.recent = [];
+  saveProgress(progress);
+  nextQuestion();
+}
+
+function toggleSevenths() {
+  progress.seventhsEnabled = !progress.seventhsEnabled;
+  progress.recent = [];
+  saveProgress(progress);
+  nextQuestion();
+}
+
+function toggleNinths() {
+  progress.ninthsEnabled = !progress.ninthsEnabled;
+  progress.recent = [];
+  saveProgress(progress);
+  nextQuestion();
+}
+
+function resetProgress() {
+  if (!confirm("Reset all progress? This cannot be undone.")) return;
+  progress = {...DEFAULT_PROGRESS, fsrs:{}, manualUnlocks:[], seventhsEnabled:false, ninthsEnabled:false};
+  saveProgress(progress);
+  streak=0; recentChords=[];
+  nextQuestion();
+}
+
+function setMode(m) { mode=m; nextQuestion(); }
+
+// ===== RENDERING =====
+function renderPiano(midis, labels) {
+  const scale = window.innerWidth < 500 ? 0.55 : 0.85;
+  const wkw=WK_W*scale, wkh=WK_H*scale, bkw=BK_W*scale, bkh=BK_H*scale;
+  let html = `<div class="piano" style="width:${WHITE_KEYS.length*wkw}px;height:${wkh}px;">`;
+  WHITE_KEYS.forEach((m,i) => {
+    const lit = midis.includes(m);
+    const lbl = lit ? (labels[m]||NOTES[m%12]) : "";
+    html += `<div class="wk${lit?' lit':''}" style="left:${i*wkw}px;width:${(wkw-1)}px;height:${wkh}px;"><span class="lbl" style="font-size:${10*scale}px;padding-bottom:${6*scale}px;">${lbl}</span></div>`;
+  });
+  ALL_KEYS.filter(m=>isBlack(m)).forEach(m => {
+    const lit = midis.includes(m);
+    const lbl = lit ? (labels[m]||NOTES[m%12]) : "";
+    const px = WHITE_KEYS.filter(w=>w<m).length;
+    const x = px*wkw - bkw/2;
+    html += `<div class="bk${lit?' lit':''}" style="left:${x}px;width:${bkw}px;height:${bkh}px;"><span class="lbl" style="font-size:${8*scale}px;padding-bottom:${4*scale}px;">${lbl}</span></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const accuracy = progress.totalAttempts>0 ? Math.round((progress.totalCorrect/progress.totalAttempts)*100) : 0;
+  const recentAcc = progress.recent.length>0 ? Math.round((progress.recent.filter(Boolean).length/progress.recent.length)*100) : 0;
+  const phase = progress.unlockedCount<=72?"Triads":progress.unlockedCount<=108?"7th Chords":progress.unlockedCount<=216?"7th Inversions":"9th Chords";
+  const dueCount = getDueCount();
+
+  let html = `<h1>Chord Trainer</h1>`;
+  html += `<div class="badges">`;
+  html += `<span class="badge">${getAvailableChords(progress).length} / ${CHORD_POOL.length} chords</span>`;
+  html += `<span class="badge">${phase}</span>`;
+  if (dueCount > 0) html += `<span class="badge due">${dueCount} due</span>`;
+  if (streak>2) html += `<span class="badge streak">🔥 ${streak} streak</span>`;
+  html += `</div>`;
+
+  // Tabs
+  html += `<div class="tabs">`;
+  MODE_NAMES.forEach((name,i) => {
+    html += `<button class="tab${mode===i?' active':''}" onclick="setMode(${i})">${name}</button>`;
+  });
+  html += `</div>`;
+
+  // Quiz
+  if (question) {
+    html += `<div class="quiz-card"><div class="question-area">`;
+    if (question.qMode===0) {
+      const midis = getChordMidi(question.chord.root,question.chord.type,question.chord.inv);
+      const names = getChordNoteNames(question.chord.root,question.chord.type,question.chord.inv);
+      const labels = {}; midis.forEach((m,i)=>{labels[m]=names[i];});
+      html += `<p class="prompt">What chord is this?</p><div class="piano-wrap">${renderPiano(midis,labels)}</div>`;
+    } else if (question.qMode===1) {
+      const notes = getChordNoteNames(question.chord.root,question.chord.type,question.chord.inv);
+      html += `<p class="prompt">Identify this chord from its notes:</p><div class="note-display">`;
+      notes.forEach(n => { html += `<span class="note-bubble">${n}</span>`; });
+      html += `</div>`;
+    } else {
+      const invLabel = question.chord.inv===0 ? " (Root)" : "";
+      html += `<p class="prompt">What notes make up this chord?</p><div class="chord-name">${chordDisplayName(question.chord)}${invLabel}</div>`;
+    }
+    html += `</div>`;
+
+    // Audio controls
+    html += `<div class="audio-controls"><button class="audio-btn" onclick="replayAudio()">🔊 Replay</button></div>`;
+
+    // Feedback
+    if (feedback) {
+      const ans = question.qMode===2 ? getChordNoteNames(question.chord.root,question.chord.type,question.chord.inv).join(" – ") : chordDisplayName(question.chord);
+      html += `<div class="feedback ${feedback}">${feedback==="correct" ? "✓ Correct!" : "✗ The answer was: "+ans}</div>`;
+    }
+
+    // Options or Reveal button
+    if (!optionsRevealed && !feedback) {
+      html += `<button class="reveal-btn" onclick="revealOptions()">Think first… then tap to show options</button>`;
+    } else {
+      html += `<div class="options">`;
+      question.options.forEach((opt,i) => {
+        let cls = "opt";
+        if (feedback && i===selectedIdx) cls += opt.correct ? " correct-pick" : " wrong-pick";
+        else if (feedback && opt.correct) cls += " correct-reveal";
+        else if (feedback && !opt.correct && i!==selectedIdx) cls += " dimmed";
+        const disabled = feedback ? "disabled" : "";
+        const label = question.qMode===2 ? opt.label : opt.name;
+        html += `<button class="${cls}" ${disabled} onclick="handleAnswer(${i})">${label}</button>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Progress
+  const fillPct = Math.min(100, (progress.recent.filter(Boolean).length/18)*100);
+  html += `<div class="progress-section">`;
+  html += `<div class="progress-header"><span class="progress-label">Progress to next unlock</span><span class="progress-label">${progress.recent.length}/20 · ${recentAcc}% (need 90%)</span></div>`;
+  html += `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${fillPct}%"></div></div>`;
+  html += `<div class="dot-row">`;
+  for(let i=0;i<20;i++) {
+    const cls = i<progress.recent.length ? (progress.recent[i]?"dot right":"dot wrong") : "dot empty";
+    html += `<div class="${cls}"></div>`;
+  }
+  html += `</div></div>`;
+
+  // Stats toggle
+  html += `<button class="stats-toggle" onclick="showStats=!showStats;render();">${showStats?"Hide":"Show"} Stats & Settings</button>`;
+
+  if (showStats) {
+    const available = getAvailableChords(progress);
+    const manual = new Set(progress.manualUnlocks || []);
+    const isGroupUnlocked = (root, type) => {
+      const dr = ROOT_DISPLAY[root]||root;
+      if (manual.has(dr+"_"+type)) return true;
+      const chords = CHORD_POOL.filter(c => c.root===root && c.type===type && TRIAD_TYPES.has(c.type));
+      return chords.length > 0 && chords.every(c => CHORD_POOL.indexOf(c) < progress.unlockedCount);
+    };
+    html += `<div class="stats-panel"><div class="stat-grid">`;
+    html += `<div><div class="stat-value">${progress.totalAttempts}</div><div class="stat-label">Attempts</div></div>`;
+    html += `<div><div class="stat-value">${accuracy}%</div><div class="stat-label">Accuracy</div></div>`;
+    html += `<div><div class="stat-value">${available.length}</div><div class="stat-label">Unlocked</div></div>`;
+    html += `<div><div class="stat-value">${streak}</div><div class="stat-label">Streak</div></div>`;
+    html += `</div><div style="margin-top:16px"><p class="progress-label" style="margin-bottom:8px">Unlock Major triads:</p><div class="key-unlock-grid">`;
+    ROOT_ORDER.forEach(r => {
+      const dn = ROOT_DISPLAY[r]||r;
+      const unlocked = isGroupUnlocked(r, "major");
+      if (unlocked) html += `<div class="key-btn unlocked">${dn} ✓</div>`;
+      else html += `<button class="key-btn" onclick="unlockGroup('${r}','major')">${dn}</button>`;
+    });
+    html += `</div></div><div style="margin-top:12px"><p class="progress-label" style="margin-bottom:8px">Unlock Minor triads:</p><div class="key-unlock-grid">`;
+    ROOT_ORDER.forEach(r => {
+      const dn = ROOT_DISPLAY[r]||r;
+      const unlocked = isGroupUnlocked(r, "minor");
+      if (unlocked) html += `<div class="key-btn unlocked">${dn}m ✓</div>`;
+      else html += `<button class="key-btn" onclick="unlockGroup('${r}','minor')">${dn}m</button>`;
+    });
+    html += `</div></div><div style="margin-top:16px"><p class="progress-label" style="margin-bottom:8px">Chord extensions (applies to all unlocked keys):</p><div class="ext-toggles">`;
+    html += `<button class="ext-toggle${progress.seventhsEnabled?' on':''}" onclick="toggleSevenths()">${progress.seventhsEnabled?'✓ ':''}7th Chords</button>`;
+    html += `<button class="ext-toggle${progress.ninthsEnabled?' on':''}" onclick="toggleNinths()">${progress.ninthsEnabled?'✓ ':''}9th Chords</button>`;
+    html += `</div></div><div style="margin-top:16px"><p class="progress-label" style="margin-bottom:8px">Unlocked chords:</p><div class="chord-tags">`;
+    available.forEach(c => { html += `<span class="chord-tag">${chordDisplayName(c)}</span>`; });
+    html += `</div></div><button class="reset-btn" onclick="resetProgress()">Reset All Progress</button></div>`;
+  }
+
+  app.innerHTML = html;
+}
+
+// ===== INIT =====
+nextQuestion();
+</script>
+
+
+</body></html>
